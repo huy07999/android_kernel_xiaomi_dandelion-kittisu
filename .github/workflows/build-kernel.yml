@@ -1,0 +1,85 @@
+name: Build KittiSU kernel
+
+on:
+  workflow_dispatch:
+    inputs:
+      device:
+        description: Device defconfig to build
+        required: true
+        default: dandelion
+        type: choice
+        options:
+          - dandelion
+          - angelica
+          - angelican
+          - angelicain
+          - cattail
+  push:
+    branches:
+      - main
+    paths:
+      - KittiSU/**
+      - arch/arm64/configs/**
+      - fs/**
+      - kernel/**
+      - security/**
+      - Kconfig
+      - Makefile
+      - .github/workflows/build-kernel.yml
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    env:
+      DEVICE: ${{ github.event_name == 'workflow_dispatch' && inputs.device || 'dandelion' }}
+      ARCH: arm64
+      SUBARCH: arm64
+
+    steps:
+      - name: Check out kernel and KittiSU
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bc bison build-essential cpio flex git libelf-dev libssl-dev python-is-python3 rsync
+
+      - name: Fetch Android GCC 4.9 toolchain
+        run: |
+          git clone --depth=1 --branch android10-release \
+            https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 \
+            toolchain
+
+      - name: Configure kernel
+        run: |
+          make O=out ARCH="$ARCH" \
+            CROSS_COMPILE="$GITHUB_WORKSPACE/toolchain/bin/aarch64-linux-android-" \
+            "${DEVICE}_defconfig"
+          grep -q '^CONFIG_KSU=y$' out/.config
+          grep -q '^CONFIG_KSU_MANUAL_HOOK=y$' out/.config
+
+      - name: Build kernel
+        run: |
+          make -j"$(nproc)" O=out ARCH="$ARCH" \
+            CROSS_COMPILE="$GITHUB_WORKSPACE/toolchain/bin/aarch64-linux-android-" \
+            Image.gz-dtb
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p artifacts
+          cp out/arch/arm64/boot/Image.gz-dtb "artifacts/Image.gz-dtb-${DEVICE}"
+          cp out/.config "artifacts/config-${DEVICE}"
+
+      - name: Upload kernel
+        uses: actions/upload-artifact@v4
+        with:
+          name: kittisu-kernel-${{ env.DEVICE }}-${{ github.sha }}
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 14
