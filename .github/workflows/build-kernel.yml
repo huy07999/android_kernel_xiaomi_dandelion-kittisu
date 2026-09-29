@@ -54,20 +54,26 @@ jobs:
         run: |
           git clone --depth=1 --branch android10-release \
             https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 \
-            toolchain
+            toolchain-aarch64
+          git clone --depth=1 --branch android10-release \
+            https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9 \
+            toolchain-arm
 
       - name: Configure kernel
         run: |
           make O=out ARCH="$ARCH" \
-            CROSS_COMPILE="$GITHUB_WORKSPACE/toolchain/bin/aarch64-linux-android-" \
+            CROSS_COMPILE="$GITHUB_WORKSPACE/toolchain-aarch64/bin/aarch64-linux-android-" \
+            CROSS_COMPILE_ARM32="$GITHUB_WORKSPACE/toolchain-arm/bin/arm-linux-androideabi-" \
             "${DEVICE}_defconfig"
           grep -q '^CONFIG_KSU=y$' out/.config
           grep -q '^CONFIG_KSU_MANUAL_HOOK=y$' out/.config
 
       - name: Build kernel
         run: |
+          chmod +x scripts/ld-version.sh scripts/gcc-version.sh scripts/recordmcount.pl
           make -j"$(nproc)" O=out ARCH="$ARCH" \
-            CROSS_COMPILE="$GITHUB_WORKSPACE/toolchain/bin/aarch64-linux-android-" \
+            CROSS_COMPILE="$GITHUB_WORKSPACE/toolchain-aarch64/bin/aarch64-linux-android-" \
+            CROSS_COMPILE_ARM32="$GITHUB_WORKSPACE/toolchain-arm/bin/arm-linux-androideabi-" \
             Image.gz-dtb
 
       - name: Collect artifacts
