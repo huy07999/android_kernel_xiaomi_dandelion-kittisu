@@ -421,10 +421,6 @@ SYSCALL_DEFINE2(stat64, const char __user *, filename,
 
 	if (!error)
 		error = cp_new_stat64(&stat, statbuf);
-
-#ifdef CONFIG_KSU_MANUAL_HOOK
-	ksu_handle_fstat64_ret(&fd, &statbuf);
-#endif
 	return error;
 }
 
