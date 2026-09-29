@@ -346,7 +346,7 @@ static int get_ctl_value_v2(struct usb_mixer_elem_info *cval, int request,
 	struct snd_usb_audio *chip = cval->head.mixer->chip;
 	/* enough space for one range */
 	unsigned char buf[sizeof(__u16) + 3 * sizeof(__u32)];
-	unsigned char *val;
+	unsigned char *val = buf;
 	int idx = 0, ret, val_size, size;
 	__u8 bRequest;
 
