@@ -1,0 +1,3 @@
+[submodule "KittiSU"]
+	path = KittiSU
+	url = https://github.com/terebiko/KittiSU.git
