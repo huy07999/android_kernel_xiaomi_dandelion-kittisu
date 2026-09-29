@@ -41,6 +41,9 @@ obj-y += vdso.o
 extra-y += vdso.lds
 CPPFLAGS_vdso.lds += -P -C -U$(ARCH)
 
+$(obj)/vdso.lds: $(src)/vdso.lds.S FORCE
+	$(call if_changed_dep,cpp_lds_S)
+
 # Force dependency (incbin is bad)
 $(obj)/vdso.o : $(obj)/vdso.so
 

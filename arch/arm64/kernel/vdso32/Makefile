@@ -119,6 +119,9 @@ obj-y += vdso.o
 extra-y += vdso.lds
 CPPFLAGS_vdso.lds += -P -C -U$(ARCH)
 
+$(obj)/vdso.lds: $(src)/vdso.lds.S FORCE
+	$(call if_changed_dep,cpp_lds_S)
+
 # Force dependency (vdso.s includes vdso.so through incbin)
 $(obj)/vdso.o: $(obj)/vdso.so
 
@@ -134,7 +137,7 @@ $(obj)/vdso.so.dbg: $(obj)/vdso.so.raw $(obj)/$(munge) FORCE
 	$(call if_changed,vdsomunge)
 
 # Link rule for the .so file, .lds has to be first
-$(obj)/vdso.so.raw: $(src)/vdso.lds $(obj-vdso) FORCE
+$(obj)/vdso.so.raw: $(obj)/vdso.lds $(obj-vdso) FORCE
 	$(call if_changed,vdsold)
 
 # Compilation rules for the vDSO sources
