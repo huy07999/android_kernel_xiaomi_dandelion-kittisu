@@ -70,7 +70,7 @@ jobs:
 
       - name: Build kernel
         run: |
-          chmod +x scripts/ld-version.sh scripts/gcc-version.sh scripts/recordmcount.pl
+          find scripts tools -type f \( -name '*.sh' -o -name '*.py' -o -name '*.pl' \) -exec chmod +x {} +
           make -j"$(nproc)" O=out ARCH="$ARCH" \
             CROSS_COMPILE="$GITHUB_WORKSPACE/toolchain-aarch64/bin/aarch64-linux-android-" \
             CROSS_COMPILE_ARM32="$GITHUB_WORKSPACE/toolchain-arm/bin/arm-linux-androideabi-" \
