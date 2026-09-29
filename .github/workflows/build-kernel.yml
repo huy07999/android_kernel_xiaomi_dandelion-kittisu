@@ -70,7 +70,8 @@ jobs:
 
       - name: Build kernel
         run: |
-          find scripts tools -type f \( -name '*.sh' -o -name '*.py' -o -name '*.pl' \) -exec chmod +x {} +
+          find arch scripts tools -type f \( -name '*.sh' -o -name '*.py' -o -name '*.pl' \) -exec chmod +x {} +
+          chmod +x scripts/dtc/dtc_overlay
           make -j"$(nproc)" ARCH="$ARCH" \
             CROSS_COMPILE="$GITHUB_WORKSPACE/toolchain-aarch64/bin/aarch64-linux-android-" \
             CROSS_COMPILE_ARM32="$GITHUB_WORKSPACE/toolchain-arm/bin/arm-linux-androideabi-" \
