@@ -61,17 +61,17 @@ jobs:
 
       - name: Configure kernel
         run: |
-          make O=out ARCH="$ARCH" \
+          make ARCH="$ARCH" \
             CROSS_COMPILE="$GITHUB_WORKSPACE/toolchain-aarch64/bin/aarch64-linux-android-" \
             CROSS_COMPILE_ARM32="$GITHUB_WORKSPACE/toolchain-arm/bin/arm-linux-androideabi-" \
             "${DEVICE}_defconfig"
-          grep -q '^CONFIG_KSU=y$' out/.config
-          grep -q '^CONFIG_KSU_MANUAL_HOOK=y$' out/.config
+          grep -q '^CONFIG_KSU=y$' .config
+          grep -q '^CONFIG_KSU_MANUAL_HOOK=y$' .config
 
       - name: Build kernel
         run: |
           find scripts tools -type f \( -name '*.sh' -o -name '*.py' -o -name '*.pl' \) -exec chmod +x {} +
-          make -j"$(nproc)" O=out ARCH="$ARCH" \
+          make -j"$(nproc)" ARCH="$ARCH" \
             CROSS_COMPILE="$GITHUB_WORKSPACE/toolchain-aarch64/bin/aarch64-linux-android-" \
             CROSS_COMPILE_ARM32="$GITHUB_WORKSPACE/toolchain-arm/bin/arm-linux-androideabi-" \
             Image.gz-dtb
@@ -79,8 +79,8 @@ jobs:
       - name: Collect artifacts
         run: |
           mkdir -p artifacts
-          cp out/arch/arm64/boot/Image.gz-dtb "artifacts/Image.gz-dtb-${DEVICE}"
-          cp out/.config "artifacts/config-${DEVICE}"
+          cp arch/arm64/boot/Image.gz-dtb "artifacts/Image.gz-dtb-${DEVICE}"
+          cp .config "artifacts/config-${DEVICE}"
 
       - name: Upload kernel
         uses: actions/upload-artifact@v4
