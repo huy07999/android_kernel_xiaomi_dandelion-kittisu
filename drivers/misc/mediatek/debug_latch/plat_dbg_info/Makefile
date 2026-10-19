@@ -1,3 +1,6 @@
+# Include plat_dbg_info.h and plat_sram_flag.h from this directory
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/debug_latch/plat_dbg_info/
+
 #
 # Copyright (C) 2016 MediaTek Inc.
 #
